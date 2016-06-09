@@ -1,0 +1,47 @@
+---
+title: "RRI raster"
+output: html_document
+---
+#### Calculate RRI (Relative Radiation Index) for whole Nepal
+#### require libraries
+```{r}
+library(raster)
+library(rgdal)
+```
+
+#### Importa DEM, Slope, and Aspect raster (already prepared)
+```{r}
+DEM<- raster("D:/GIS file_Nepal/srtm_90m")
+plot(DEM, main="DEM")
+```
+```{r}
+aspect<-raster("D:/GIS file_Nepal/aspect_90m")
+plot(aspect, main= "Aspect")
+```
+```{r}
+slope<- raster("D:/GIS file_Nepal/slope_90")
+plot(slope, main="Slope")
+```
+
+#### Extract Latitude value required for formula
+```{r}
+lat = init(DEM, 'y')
+```
+
+#### RRI = cos (180° - A)* sin B * sin Ø + cos B * cos Ø
+#### Where A is aspect, B is the slope, and Ø is the latitude of each transect.
+
+#### RRI Calcuation by formula
+```{r}
+RRI= cos (180-aspect) * sin (slope) * sin (lat) + cos (slope) * cos (lat)
+RRI
+```
+
+#### Export RRI raster
+
+```{r}
+RRI.r<- writeRaster(RRI, "d:/GIS file_Nepal/RRI_90m1.tif", format="GTiff", overwrite=TRUE)
+plot(RRI.r, main="Relative Radiation Index")
+```
+
+#### DONE
