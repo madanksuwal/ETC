@@ -1,0 +1,111 @@
+# Import all dataframes, of the same extension 
+setwd("W:/MaxEnt Beta compare/Rhododendron 17 spp/Model summary Logistics")
+temp<- list.files(pattern = "*.csv")
+temp
+
+# Rename the files separately
+for(i in 1:length(temp)){
+       assign(paste0("D", i), read.csv(temp[i]))
+    } 
+ls()
+summary(D28)
+
+# Create list of data frames 
+A.list<- list(D6, D7, D8, D9, D10, D13, D20, D28, D29)
+B.list<- list(D4, D5, D12, D18, D19, D21, D22, D24, D27)
+C.list<- list(D1, D3, D11, D15, D25)
+D.list<- list(D2, D14, D16, D17, D23, D26)
+
+
+# plot from loop adding line of each dataframe (29) in a plot
+# BETA regularization VS Sensitivity
+tiff("Beta vs Sensitivity.tiff", width=3000, height=3000, res=400, compression="lzw")
+par(mar=c(4,4,1,1))
+
+plot(D1$Beta, D1$Sensitivity, type="n", ylim=c(0.1, 0.65),
+     xlab="Regularization Parameter", ylab="Sensitivity")
+# Add Group "A" Data sets, with blue colour
+A.list<- list(D6, D7, D8, D9, D10, D13, D20, D28, D29)
+for(i in 1:9){
+  lines(x=(A.list [[i]]$Beta), y = (A.list[[i]]$Sensitivity),  lty=2, col="blue", ylim=c(0.1, 0.65))
+}
+# Add Group "B" Data sets, with blue colour
+B.list<- list(D4, D5, D12, D18, D19, D21, D22, D24, D27)
+for(i in 1:9){
+  lines(x=(B.list [[i]]$Beta), y = (B.list[[i]]$Sensitivity),  lty=3, col="black", ylim=c(0.1, 0.65))
+}
+# Add Group "B" Data sets, with blue colour
+C.list<- list(D1, D3, D11, D15, D25)
+for(i in 1:5){
+  lines(x=(C.list [[i]]$Beta), y = (C.list[[i]]$Sensitivity),  lty=1, col="red", ylim=c(0.1, 0.65))
+}
+# Add Group "B" Data sets, with blue colour
+D.list<- list(D2, D14, D16, D17, D23, D26)
+for(i in 1:6){
+  lines(x=(D.list [[i]]$Beta), y = (D.list[[i]]$Sensitivity),  lty=4, col="green", ylim=c(0.1, 0.65))
+}
+abline(v=2, lty=2, lwd=1)
+abline(v=5, lty=2, lwd=1)
+legend("topleft", lty = c(2,3,1,4), col=c("blue", "black", "red", "green"), 
+       bty="n", legend=c("Group A", "Group B","Group C","Group D"), ncol=2)
+
+
+## This will define the inset figure
+par(fig = c(grconvertX(c(10, 20), from="user", to="ndc"),
+            grconvertY(c(0.11, 0.23), from="user", to="ndc")),
+    mar = c(0,0,0,0), tcl=-0.2, mgp=c(1, 0.2, 0),
+    new = TRUE)
+# This is the inset figure
+plot(D1$Beta, D1$Sensitivity, type="n", ylim=c(0.15, 0.55), xlim=c(0,2),
+     xlab="", ylab="")
+for(i in 1:9){
+  lines(x=(A.list [[i]]$Beta), y = (A.list[[i]]$Sensitivity),  lty=2, col="blue", ylim=c(0.15, 0.55), xlim=c(0,2))
+}
+for(i in 1:9){
+  lines(x=(B.list [[i]]$Beta), y = (B.list[[i]]$Sensitivity),  lty=3, col="black", ylim=c(0.15, 0.55), xlim=c(0,2))
+}
+for(i in 1:5){
+  lines(x=(C.list [[i]]$Beta), y = (C.list[[i]]$Sensitivity),  lty=1, col="red", ylim=c(0.15, 0.55), xlim=c(0,2))
+}
+for(i in 1:6){
+  lines(x=(D.list [[i]]$Beta), y = (D.list[[i]]$Sensitivity),  lty=4, col="green", ylim=c(0.15, 0.55), xlim=c(0,2))
+}
+
+dev.off()
+
+#======================
+
+
+
+
+### Group D
+# Created dataframe with Beta valuses 
+D.sd <- D6[,1:2]
+D.min<- D6[,1:2]
+D.max<- D6[,1:2]
+D.mn <- D6[,1:2]
+
+# Calculate SD/Min/Max/Mean between data frames. For Group "A"
+dim(D2) # checking dimension for looping
+for(i in 1:42){       # i for row number
+  for(j in 3:10){     # j for column number 
+    dd<-c(D.list[[1]][i,j] , D.list[[2]][i,j] , D.list[[3]][i,j] ,   # select cell value of each dataframe and save as vector
+         D.list[[4]][i,j] , D.list[[5]][i,j], D.list[[6]][i,j])
+    D.sd[i,j]<-sd(dd)     # take SD of verctor every time, every time is each cell of all dataframes 
+    D.min[i,j]<-min(dd)
+    D.max[i,j]<-max(dd)
+    D.mn[i,j]<-mean(dd)
+  }
+}
+# Assiging name of column from previous data frame 
+colnames(D.sd)<- names(D1)
+colnames(D.min)<- names(D1)
+colnames(D.max)<- names(D1)
+colnames(D.mn)<- names(D1)
+
+# Plot with polygon on a plot
+plot(D.mn$Beta, D.mn$Kappa, type="l", col="green",lwd=2, ylim=c(0.25, 0.85))
+xx<- c( D.min$Beta,  rev(D.min$Beta))  # starting and ending and go back to starting from end point 
+yy<- c(D.max$Kappa, rev(D.min$Kappa) )
+polygon(xx,yy, col="green", density=10)
+
